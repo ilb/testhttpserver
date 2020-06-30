@@ -28,6 +28,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import static org.apache.cxf.jaxrs.client.WebClient.client;
 import org.apache.cxf.jaxrs.client.cache.CacheControlFeature;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
@@ -55,22 +56,21 @@ public class TestHttpServerFileTest {
     }
 
     @Test
-    public void testSomeMethod() throws MalformedURLException, IOException, Exception {
+    public void testServer() throws MalformedURLException, IOException, Exception {
 
         URI endpointAddress = URI.create("http://localhost:52341/api/endpoint");
-        WebTarget target = client.target(endpointAddress);
 
         Path source = Paths.get(this.getClass().getResource("test.pdf").toURI());
         try ( TestHttpServerFile th = new TestHttpServerFile(endpointAddress.toURL(), source)) {
             // First call
-            executeRequest(target, source);
+            executeRequestWithClient(endpointAddress, source);
             // Second call should be cached
-            executeRequest(target, source);
-
+            executeRequestWithClient(endpointAddress, source);
         }
     }
 
-    private void executeRequest(WebTarget target, Path source) throws IOException {
+    private void executeRequestWithClient(URI endpointAddress, Path source) throws IOException {
+        WebTarget target = client.target(endpointAddress);
         Response response = target.request().get();
 
         Instant expectedLastMod = Files.getLastModifiedTime(source).toInstant().truncatedTo(ChronoUnit.SECONDS);
