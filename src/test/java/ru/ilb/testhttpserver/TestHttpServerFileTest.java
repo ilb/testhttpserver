@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import javax.ws.rs.client.Client;
@@ -60,7 +61,7 @@ public class TestHttpServerFileTest {
         URI endpointAddress = URI.create("http://localhost:52341/api/endpoint");
         WebTarget target = client.target(endpointAddress);
 
-        Path source = Path.of(this.getClass().getResource("test.pdf").toURI());
+        Path source = Paths.get(this.getClass().getResource("test.pdf").toURI());
         try ( TestHttpServerFile th = new TestHttpServerFile(endpointAddress.toURL(), source)) {
             // First call
             executeRequest(target, source);
