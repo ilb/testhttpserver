@@ -29,7 +29,6 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import org.apache.cxf.jaxrs.client.cache.CacheControlFeature;
-import org.apache.cxf.jaxrs.provider.BinaryDataProvider;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
@@ -49,10 +48,10 @@ public class TestHttpServerFileTest {
         cacheControlFeature.setCacheResponseInputStream(true);
 
         client = ClientBuilder.newBuilder()
+                // see https://www.ehcache.org/documentation/3.0/107.html
+                //.property("org.apache.cxf.jaxrs.client.cache.CacheControlFeature.config-uri", "ehcache-jsr107-config")
                 .register(cacheControlFeature)
-                //.register(new BinaryDataProvider<>())
                 .build();
-
     }
 
     @Test
