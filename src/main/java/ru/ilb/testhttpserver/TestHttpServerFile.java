@@ -37,7 +37,7 @@ public class TestHttpServerFile extends TestHttpServer {
     private final static String LAST_MODIFIED = "Last-Modified";
     private final static String CONTENT_TYPE = "Content-Type";
     private static final String CACHE_CONTROL = "Cache-Control";
-    private static final String CACHE_CONTROL_MUST_REVALIDATE = "must-revalidate";
+    private static final String CACHE_CONTROL_VALUE = "max-age=1, must-revalidate";
     private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
 
     public TestHttpServerFile(URL url, Path contentsPath) throws IOException {
@@ -55,7 +55,7 @@ public class TestHttpServerFile extends TestHttpServer {
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_MODIFIED, 0);
             } else {
                 responseHeaders.add(CONTENT_TYPE, Files.probeContentType(contentsPath));
-                responseHeaders.add(CACHE_CONTROL, "max-age=0");
+                responseHeaders.add(CACHE_CONTROL, CACHE_CONTROL_VALUE);
 
                 byte[] response = Files.readAllBytes(contentsPath);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
