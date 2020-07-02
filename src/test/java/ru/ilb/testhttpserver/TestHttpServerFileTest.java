@@ -17,13 +17,17 @@ package ru.ilb.testhttpserver;
 
 import ru.ilb.testhttpserver.TestHttpServerFile;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Random;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -43,14 +47,15 @@ public class TestHttpServerFileTest {
 
     private final CacheControlFeature cacheControlFeature;
 
-    public TestHttpServerFileTest() {
+    public TestHttpServerFileTest() throws URISyntaxException {
 
         cacheControlFeature = new CacheControlFeature();
         cacheControlFeature.setCacheResponseInputStream(true);
 
+        // see https://www.ehcache.org/documentation/3.0/107.html
+//        URI cacheConfigUri = this.getClass().getClassLoader().getResource("ehcache-jsr107-config.xml").toURI();
         client = ClientBuilder.newBuilder()
-                // see https://www.ehcache.org/documentation/3.0/107.html
-                //.property("org.apache.cxf.jaxrs.client.cache.CacheControlFeature.config-uri", "ehcache-jsr107-config")
+//                .property("org.apache.cxf.jaxrs.client.cache.CacheControlFeature.config-uri", cacheConfigUri.toString())
                 .register(cacheControlFeature)
                 .build();
     }
@@ -60,8 +65,18 @@ public class TestHttpServerFileTest {
 
         URI endpointAddress = URI.create("http://localhost:52341/api/endpoint");
 
-        Path source = Paths.get(this.getClass().getResource("test.pdf").toURI());
-        try ( TestHttpServerFile th = new TestHttpServerFile(endpointAddress.toURL(), source)) {
+        //Path source = Paths.get(this.getClass().getResource("test.pdf").toURI());
+
+        Path source = Files.createTempFile("InputStreamToPathFunctionImpl", ".tmp");
+        System.out.println(source.toString());
+
+        // random stream variant http://www.java2s.com/Code/Java/File-Input-Output/Randominputstream.htm
+        try (RandomAccessFile writer = new RandomAccessFile(source.toString(), "rw")) {
+            writer.seek(1024 * 1024 * 10);
+            writer.writeInt(0);
+        }
+
+        try (TestHttpServerFile th = new TestHttpServerFile(endpointAddress.toURL(), source)) {
             // First call
             executeRequestWithClient(endpointAddress, source);
             // Second call should be cached
@@ -76,7 +91,8 @@ public class TestHttpServerFileTest {
         Instant expectedLastMod = Files.getLastModifiedTime(source).toInstant().truncatedTo(ChronoUnit.SECONDS);
         assertEquals(expectedLastMod, response.getLastModified().toInstant());
 
-        assertArrayEquals(Files.readAllBytes(source), response.readEntity(byte[].class));
+        assertArrayEquals(Files.readAllBytes(source), response.readEntity(byte[].class
+        ));
 
     }
 }

@@ -54,7 +54,7 @@ public class TestHttpServerFile extends TestHttpServer {
             if (lastModifiedClient != null && lastModifiedClient.compareTo(lastModifiedServer) >= 0) {
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_MODIFIED, 0);
             } else {
-                responseHeaders.add(CONTENT_TYPE, Files.probeContentType(contentsPath));
+                responseHeaders.add(CONTENT_TYPE, "application/octet-stream"); // Files.probeContentType(contentsPath)
                 responseHeaders.add(CACHE_CONTROL, CACHE_CONTROL_VALUE);
 
                 byte[] response = Files.readAllBytes(contentsPath);
