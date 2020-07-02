@@ -52,7 +52,7 @@ public class TestHttpServerFile extends TestHttpServer {
 
             // file is not modified since last request
             if (lastModifiedClient != null && lastModifiedClient.compareTo(lastModifiedServer) >= 0) {
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_MODIFIED, 0);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_MODIFIED, -1);
             } else {
                 responseHeaders.add(CONTENT_TYPE, "application/octet-stream"); // Files.probeContentType(contentsPath)
                 responseHeaders.add(CACHE_CONTROL, CACHE_CONTROL_VALUE);
