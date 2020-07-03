@@ -15,7 +15,6 @@
  */
 package ru.ilb.testhttpserver;
 
-import ru.ilb.testhttpserver.TestHttpServerFile;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.MalformedURLException;
@@ -23,16 +22,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Random;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
-import static org.apache.cxf.jaxrs.client.WebClient.client;
 import org.apache.cxf.jaxrs.client.cache.CacheControlFeature;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
