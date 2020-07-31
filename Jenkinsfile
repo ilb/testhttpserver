@@ -27,6 +27,9 @@ pipeline {
             steps {
                 sh "mvn -B release:prepare"
                 sh "mvn -B release:perform"
+                dir ("target/checkout") {
+                    sh "mvn -P'!local-repository,sonatype-repository,release-profile' deploy"
+                }
             }
         }
     }
