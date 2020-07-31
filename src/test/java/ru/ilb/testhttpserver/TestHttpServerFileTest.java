@@ -50,7 +50,7 @@ public class TestHttpServerFileTest {
         // see https://www.ehcache.org/documentation/3.0/107.html
 //        URI cacheConfigUri = this.getClass().getClassLoader().getResource("ehcache-jsr107-config.xml").toURI();
         client = ClientBuilder.newBuilder()
-//                .property("org.apache.cxf.jaxrs.client.cache.CacheControlFeature.config-uri", cacheConfigUri.toString())
+                //                .property("org.apache.cxf.jaxrs.client.cache.CacheControlFeature.config-uri", cacheConfigUri.toString())
                 .register(cacheControlFeature)
                 .build();
     }
@@ -61,7 +61,6 @@ public class TestHttpServerFileTest {
         URI endpointAddress = URI.create("http://localhost:52341/api/endpoint");
 
         //Path source = Paths.get(this.getClass().getResource("test.pdf").toURI());
-
         Path source = Files.createTempFile("InputStreamToPathFunctionImpl", ".tmp");
         System.out.println(source.toString());
 
@@ -76,6 +75,8 @@ public class TestHttpServerFileTest {
             executeRequestWithClient(endpointAddress, source);
             // Second call should be cached
             executeRequestWithClient(endpointAddress, source);
+            assertEquals(1, th.getStats(200));
+            assertEquals(0, th.getStats(304));
         }
     }
 
