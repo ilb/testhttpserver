@@ -17,24 +17,20 @@ import java.net.URL;
  *
  * @author slavb
  */
-public class TestHttpServer implements AutoCloseable {
+public abstract class TestHttpServer implements AutoCloseable {
 
+    protected final URL url;
     private final HttpServer httpServer;
 
-    public TestHttpServer(URL url, HttpHandler handler) throws IOException {
+    public TestHttpServer(URL url) throws IOException {
+        this.url = url;
         httpServer = createServer(url);
-        httpServer.createContext(url.getPath(), handler);
+        httpServer.createContext(url.getPath(), this::handle);
         httpServer.start();
     }
 
-    public TestHttpServer(URL url, String content) throws IOException {
-        this(url, (HttpExchange exchange) -> {
-            byte[] response = content.getBytes();
-            exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-            exchange.getResponseBody().write(response);
-            exchange.close();
-        });
-    }
+
+    abstract void handle (HttpExchange exchange) throws IOException;
 
     private HttpServer createServer(URL url) throws IOException {
         return HttpServer.create(new InetSocketAddress(url.getPort() != -1 ? url.getPort() : url.getDefaultPort()), 0);

@@ -29,19 +29,21 @@ public class TestHttpServerQuery extends TestHttpServer {
     private final static String CONTENT_TYPE = "Content-Type";
 
     public TestHttpServerQuery(URL url) throws IOException {
-        super(url, (HttpExchange exchange) -> {
-            Map<String, String> map = queryToMap(exchange.getRequestURI().getQuery());
-            JSONObject json = new JSONObject(map);
-            byte[] response = json.toString().getBytes();
-            Headers responseHeaders = exchange.getResponseHeaders();
+        super(url);
+    }
 
-            responseHeaders.add(CONTENT_TYPE, "application/json");
-            exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+    @Override
+    void handle(HttpExchange exchange) throws IOException {
+        Map<String, String> map = queryToMap(exchange.getRequestURI().getQuery());
+        JSONObject json = new JSONObject(map);
+        byte[] response = json.toString().getBytes();
+        Headers responseHeaders = exchange.getResponseHeaders();
 
-            exchange.getResponseBody().write(response);
-            exchange.close();
+        responseHeaders.add(CONTENT_TYPE, "application/json");
+        exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
 
-        });
+        exchange.getResponseBody().write(response);
+        exchange.close();
     }
 
     private final static Map<String, String> queryToMap(String query) {

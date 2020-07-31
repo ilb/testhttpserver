@@ -22,17 +22,27 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author slavb
  */
 public class TestHttpServerFile extends TestHttpServer {
+
+    private static final Logger LOG = Logger.getLogger(TestHttpServerFile.class.getName());
+    private final Path contentsPath;
+    private final Map<Integer, Integer> stats = new HashMap<>();
 
     private final static String LAST_MODIFIED = "Last-Modified";
     private final static String CONTENT_TYPE = "Content-Type";
@@ -41,28 +51,43 @@ public class TestHttpServerFile extends TestHttpServer {
     private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
 
     public TestHttpServerFile(URL url, Path contentsPath) throws IOException {
-        super(url, (HttpExchange exchange) -> {
+        super(url);
+        this.contentsPath = contentsPath;
+    }
 
-            Instant lastModifiedServer = Files.getLastModifiedTime(contentsPath).toInstant().truncatedTo(ChronoUnit.SECONDS);
+    @Override
+    void handle(HttpExchange exchange) throws IOException {
+        Instant lastModifiedServer = Files.getLastModifiedTime(contentsPath).toInstant().truncatedTo(ChronoUnit.SECONDS);
 
-            Headers requestHeaders = exchange.getRequestHeaders();
-            Instant lastModifiedClient = getIfModifiedSince(requestHeaders);
-            Headers responseHeaders = exchange.getResponseHeaders();
-            responseHeaders.add(LAST_MODIFIED, formatLastModifiedHeader(lastModifiedServer));
+        Headers requestHeaders = exchange.getRequestHeaders();
+        Instant lastModifiedClient = getIfModifiedSince(requestHeaders);
+        Headers responseHeaders = exchange.getResponseHeaders();
+        responseHeaders.add(LAST_MODIFIED, formatLastModifiedHeader(lastModifiedServer));
 
-            // file is not modified since last request
-            if (lastModifiedClient != null && lastModifiedClient.compareTo(lastModifiedServer) >= 0) {
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_MODIFIED, -1);
-            } else {
-                responseHeaders.add(CONTENT_TYPE, "application/octet-stream"); // Files.probeContentType(contentsPath)
-                responseHeaders.add(CACHE_CONTROL, CACHE_CONTROL_VALUE);
+        // file is not modified since last request
+        if (lastModifiedClient != null && lastModifiedClient.compareTo(lastModifiedServer) >= 0) {
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_MODIFIED, -1);
+            LOG.log(Level.INFO, "{0} HTTP_NOT_MODIFIED", new Object[]{url});
+            updateStats(HttpURLConnection.HTTP_NOT_MODIFIED);
+        } else {
+            responseHeaders.add(CONTENT_TYPE, "application/octet-stream"); // Files.probeContentType(contentsPath)
+            responseHeaders.add(CACHE_CONTROL, CACHE_CONTROL_VALUE);
 
-                byte[] response = Files.readAllBytes(contentsPath);
-                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-                exchange.getResponseBody().write(response);
-            }
-            exchange.close();
-        });
+            byte[] response = Files.readAllBytes(contentsPath);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+            exchange.getResponseBody().write(response);
+            LOG.log(Level.INFO, "{0} HTTP_OK", new Object[]{url});
+            updateStats(HttpURLConnection.HTTP_OK);
+        }
+        exchange.close();
+    }
+
+    private int updateStats(int httpCode) {
+        return stats.merge(httpCode, 1, Integer::sum);
+    }
+
+    public int getStats(int httpCode) {
+        return stats.getOrDefault(httpCode, 0);
     }
 
     private static String formatLastModifiedHeader(Instant instant) {
