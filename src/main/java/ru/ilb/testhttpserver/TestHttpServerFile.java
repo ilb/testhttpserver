@@ -43,16 +43,25 @@ public class TestHttpServerFile extends TestHttpServer {
     private static final Logger LOG = Logger.getLogger(TestHttpServerFile.class.getName());
     private final Path contentsPath;
     private final Map<Integer, Integer> stats = new HashMap<>();
+    private final Map<String, String> headers = new HashMap<>();
 
     private final static String LAST_MODIFIED = "Last-Modified";
     private final static String CONTENT_TYPE = "Content-Type";
     private static final String CACHE_CONTROL = "Cache-Control";
-    private static final String CACHE_CONTROL_VALUE = "max-age=1, must-revalidate";
+    private static final String CACHE_CONTROL_DEFAULT_VALUE = "max-age=1, must-revalidate";
     private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
 
     public TestHttpServerFile(URL url, Path contentsPath) throws IOException {
         super(url);
         this.contentsPath = contentsPath;
+        headers.put(CONTENT_TYPE, "application/octet-stream"); // Files.probeContentType(contentsPath)
+        headers.put(CACHE_CONTROL, CACHE_CONTROL_DEFAULT_VALUE);
+    }
+
+    public TestHttpServerFile(URL url, Path contentsPath, Map<String, String> headers) throws IOException {
+        super(url);
+        this.contentsPath = contentsPath;
+        headers.putAll(headers);
     }
 
     @Override
@@ -70,8 +79,7 @@ public class TestHttpServerFile extends TestHttpServer {
             LOG.log(Level.INFO, "{0} HTTP_NOT_MODIFIED", new Object[]{url});
             updateStats(HttpURLConnection.HTTP_NOT_MODIFIED);
         } else {
-            responseHeaders.add(CONTENT_TYPE, "application/octet-stream"); // Files.probeContentType(contentsPath)
-            responseHeaders.add(CACHE_CONTROL, CACHE_CONTROL_VALUE);
+            this.headers.entrySet().forEach(e -> responseHeaders.add(e.getKey(),e.getValue()));
 
             byte[] response = Files.readAllBytes(contentsPath);
             exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
