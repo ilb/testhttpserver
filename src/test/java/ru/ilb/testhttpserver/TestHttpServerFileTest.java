@@ -87,7 +87,7 @@ public class TestHttpServerFileTest {
             executeRequestWithUrlConnection(endpointAddress, source);
             executeRequestWithUrlConnection(endpointAddress, source);
 
-            assertEquals(2, th.getStats(200));
+            assertEquals(1, th.getStats(200));
             assertEquals(0, th.getStats(304));
         }
     }
