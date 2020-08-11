@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Test;
 import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
+import ru.ilb.jfunction.resources.URLToStringFunction;
 
 /**
  *
@@ -104,16 +105,17 @@ public class TestHttpServerFileTest {
     }
 
     private void executeRequestWithUrlConnection(URI endpointAddress, Path source) throws IOException {
-        URL url = new URL(endpointAddress.toURL().toString());
-        URLConnection conn = url.openConnection();
-        Map<String, List<String>> map = conn.getHeaderFields();
-        long kek = conn.getExpiration();
-        map.entrySet().forEach(x -> {
-            System.out.println("key: " + x.getKey() + " ");
-            x.getValue().forEach(y -> {
-                System.out.println("value: " + y + " ");
-            });
-
-        });
+        String apply = URLToStringFunction.INSTANCE.apply(endpointAddress.toURL());
+//        URL url = new URL(endpointAddress.toURL().toString());
+//        URLConnection conn = url.openConnection();
+//        Map<String, List<String>> map = conn.getHeaderFields();
+//        long kek = conn.getExpiration();
+//        map.entrySet().forEach(x -> {
+//            System.out.println("key: " + x.getKey() + " ");
+//            x.getValue().forEach(y -> {
+//                System.out.println("value: " + y + " ");
+//            });
+//
+//        });
     }
 }

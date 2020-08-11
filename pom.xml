@@ -75,7 +75,12 @@
             <version>3.7.1</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>ru.ilb.jfunction</groupId>
+            <artifactId>jfunction-resources</artifactId>
+            <version>1.3-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <pluginManagement>
