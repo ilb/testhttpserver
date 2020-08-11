@@ -16,10 +16,13 @@
 package ru.ilb.testhttpserver;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -31,6 +34,9 @@ import javax.ws.rs.core.Response;
 import org.apache.cxf.jaxrs.client.cache.CacheControlFeature;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
+import java.net.URLConnection;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -42,6 +48,7 @@ public class TestHttpServerFileTest {
 
     private final CacheControlFeature cacheControlFeature;
 
+//    private final URIConnection uriConn;
     public TestHttpServerFileTest() throws URISyntaxException {
 
         cacheControlFeature = new CacheControlFeature();
@@ -71,11 +78,15 @@ public class TestHttpServerFileTest {
         }
 
         try (TestHttpServerFile th = new TestHttpServerFile(endpointAddress.toURL(), source)) {
-            // First call
-            executeRequestWithClient(endpointAddress, source);
-            // Second call should be cached
-            executeRequestWithClient(endpointAddress, source);
-            assertEquals(1, th.getStats(200));
+//            //First call
+//            executeRequestWithClient(endpointAddress, source);
+//            //Second call should be cached
+//            executeRequestWithClient(endpointAddress, source);
+
+            executeRequestWithUrlConnection(endpointAddress, source);
+            executeRequestWithUrlConnection(endpointAddress, source);
+
+            assertEquals(2, th.getStats(200));
             assertEquals(0, th.getStats(304));
         }
     }
@@ -90,5 +101,19 @@ public class TestHttpServerFileTest {
         assertArrayEquals(Files.readAllBytes(source), response.readEntity(byte[].class
         ));
 
+    }
+
+    private void executeRequestWithUrlConnection(URI endpointAddress, Path source) throws IOException {
+        URL url = new URL(endpointAddress.toURL().toString());
+        URLConnection conn = url.openConnection();
+        Map<String, List<String>> map = conn.getHeaderFields();
+        long kek = conn.getExpiration();
+        map.entrySet().forEach(x -> {
+            System.out.println("key: " + x.getKey() + " ");
+            x.getValue().forEach(y -> {
+                System.out.println("value: " + y + " ");
+            });
+
+        });
     }
 }
