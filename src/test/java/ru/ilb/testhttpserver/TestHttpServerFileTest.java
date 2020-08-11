@@ -86,7 +86,7 @@ public class TestHttpServerFileTest {
             executeRequestWithUrlConnection(endpointAddress, source);
             executeRequestWithUrlConnection(endpointAddress, source);
 
-            assertEquals(2, th.getStats(200));
+            assertEquals(1, th.getStats(200));
             assertEquals(0, th.getStats(304));
         }
     }
@@ -107,7 +107,6 @@ public class TestHttpServerFileTest {
         URL url = new URL(endpointAddress.toURL().toString());
         URLConnection conn = url.openConnection();
         Map<String, List<String>> map = conn.getHeaderFields();
-        long kek = conn.getExpiration();
         map.entrySet().forEach(x -> {
             System.out.println("key: " + x.getKey() + " ");
             x.getValue().forEach(y -> {
