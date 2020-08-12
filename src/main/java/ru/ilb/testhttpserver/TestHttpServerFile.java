@@ -19,12 +19,11 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.ResponseCache;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -33,6 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import ru.ilb.testhttpservercache.MyResponseCache;
 
 /**
  *
@@ -53,6 +53,7 @@ public class TestHttpServerFile extends TestHttpServer {
 
     public TestHttpServerFile(URL url, Path contentsPath) throws IOException {
         super(url);
+        ResponseCache.setDefault(new MyResponseCache());
         this.contentsPath = contentsPath;
         headers.put(CONTENT_TYPE, "application/octet-stream"); // Files.probeContentType(contentsPath)
         headers.put(CACHE_CONTROL, CACHE_CONTROL_DEFAULT_VALUE);
@@ -61,7 +62,7 @@ public class TestHttpServerFile extends TestHttpServer {
     public TestHttpServerFile(URL url, Path contentsPath, Map<String, String> headers) throws IOException {
         super(url);
         this.contentsPath = contentsPath;
-        headers.putAll(headers);
+        headers.putAll(headers); 
     }
 
     @Override

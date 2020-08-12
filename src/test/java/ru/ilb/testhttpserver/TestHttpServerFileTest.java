@@ -16,13 +16,10 @@
 package ru.ilb.testhttpserver;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -34,9 +31,6 @@ import javax.ws.rs.core.Response;
 import org.apache.cxf.jaxrs.client.cache.CacheControlFeature;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-import java.net.URLConnection;
-import java.util.List;
-import java.util.Map;
 import ru.ilb.jfunction.resources.URLToStringFunction;
 
 /**
@@ -65,9 +59,9 @@ public class TestHttpServerFileTest {
 
     @Test
     public void testServer() throws MalformedURLException, IOException, Exception {
-
+        
         URI endpointAddress = URI.create("http://localhost:52341/api/endpoint");
-
+        
         //Path source = Paths.get(this.getClass().getResource("test.pdf").toURI());
         Path source = Files.createTempFile("InputStreamToPathFunctionImpl", ".tmp");
         System.out.println(source.toString());
@@ -106,16 +100,5 @@ public class TestHttpServerFileTest {
 
     private void executeRequestWithUrlConnection(URI endpointAddress, Path source) throws IOException {
         String apply = URLToStringFunction.INSTANCE.apply(endpointAddress.toURL());
-//        URL url = new URL(endpointAddress.toURL().toString());
-//        URLConnection conn = url.openConnection();
-//        Map<String, List<String>> map = conn.getHeaderFields();
-//        long kek = conn.getExpiration();
-//        map.entrySet().forEach(x -> {
-//            System.out.println("key: " + x.getKey() + " ");
-//            x.getValue().forEach(y -> {
-//                System.out.println("value: " + y + " ");
-//            });
-//
-//        });
     }
 }
